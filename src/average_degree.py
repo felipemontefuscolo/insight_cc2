@@ -66,7 +66,7 @@ def make_edges(tags):
     conn = []
     for i in range(0, len(tags)):
         for j in range(0, i):
-            conn.append((i,j))
+            conn.append((tags[i],tags[j]))
     return conn
 
 # =============================================================================================
@@ -80,33 +80,47 @@ def main():
     # Initialize our graph
     g = Graph()
     
-    with open('../tweet_output/ft1.txt') as txt:
-        first_tweet = txt.readline()
+    with open('../tweet_output/ft1.txt') as File:
+        for tweet in File:
+          tags = getTags(tweet)
+          if len(tags) > 1:
+              first_tweet = tweet
+              break
     
-    tweets = [ first_tweet  ] # list of tweets in the past 60s
+    tweets = [ first_tweet  ] # list of tweets with two or more hashtags in the past 60s
     
     old_time = getTime(tweets[0]) # Oldest tweet time
     old_tags = getTags(tweets[0])
     old_edges = make_edges(old_tags)
-    
-    counter = 0
+   
+    ft2 = open('../tweet_output/ft2.txt', 'w')
+ 
+    counter = 1
     # For each tweet that arrives ...
     with open('../tweet_output/ft1.txt') as File:
         for tweet in File:
             # Obs: It automatically uses buffered IO and memory management so you don't have to worry about large files.
             # Please check http://stackoverflow.com/questions/8009882/how-to-read-large-file-line-by-line-in-python
-            print("counter = ", counter, tweet=='\n')
+            print("")
+            print("counter = ", counter)
             counter = counter + 1
-            tweets.append(tweet)
            
             if tweet == '\n':
               break
+
+            
  
             # extraxt timestamp
             time = getTime(tweet) 
             tags = getTags(tweet)
             edges = make_edges(tags)   
-            #
+  
+            # If there is no edge, continue 
+            if len(tags) < 2:
+                continue
+ 
+            tweets.append(tweet)
+
             # Check 60s window
             if time-old_time > 60:
                 for i,j in old_edges:
@@ -115,12 +129,23 @@ def main():
                 old_time = getTime(tweets[0]) 
                 old_tags = getTags(tweets[0])
                 old_edges = make_edges(old_tags)
-            #    
+
             # Include the new edges in the graph
             for i,j in edges:
                 g.add_edge((i,j))
-            #    
-            #input("Press Enter to continue...")
+        
+            #print(edges)
+            print("Graph:")
+            g.p()
+
+            # compute the average degree
+            ave = 0
+            for key, value in g._graph.iteritems():
+                ave = ave + len(value)
+            #ave = ave / len(g._graph)
+            print(" ===============================  Average: ", ave, len(g._graph))
+
+    ft2.close()
 
 if __name__ == "__main__":
     main()
