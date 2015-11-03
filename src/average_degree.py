@@ -1,56 +1,35 @@
 import json      # to read json data
-import bisect    # for the sorted list
 from collections import defaultdict
-from pprint import pprint
 import time      # to read timestamp
 import re        # regex
+from pprint import pprint  # debug purpose
 
 
-
-# Function to remove an element from a sorted list
-def removeL(a, x):
-    'Locate the leftmost value exactly equal to x'
-    i = bisect.bisect_left(a, x)
-    if i != len(a) and a[i] == x:
-        del a[i]
-    #raise ValueError
-
-# This class implementation was inspired by http://stackoverflow.com/questions/19472530/representing-graphs-data-structure-in-python
 class Graph(object):
     """ Graph data structure, undirected by default. """
 
-    def __init__(self, connections = []):
-        self._graph = defaultdict(list)
-        self.add_connections(connections)
+    def __init__(self):
+        self._graph = defaultdict(set)
 
-    def add_connections(self, connections):
-        """ Add connections (list of tuple pairs) to graph """
-
-        for node1, node2 in connections:
-            self.add(node1, node2)
-   
     def add_edge(self, edge):
         """ Add an edge (tuple) to the graph """
-
-        bisect.insort(self._graph[edge[0]], edge[1])
-        bisect.insort(self._graph[edge[1]], edge[0]) 
+        self._graph[edge[0]].add(edge[1])
+        self._graph[edge[1]].add(edge[0])
     
     def remove_edge(self, edge):
         """ remove and edge (tuple) from the graph """
-
-        removeL(self._graph[edge[0]], edge[1])
-        removeL(self._graph[edge[1]], edge[0])
-        if not self._graph[edge[0]]:
+        self._graph[edge[0]].remove(edge[1])
+        self._graph[edge[1]].remove(edge[0])
+        if not (self._graph[edge[0]]):
             del self._graph[edge[0]]
-        if not self._graph[edge[1]]:
-            del self._graph[edge[1]]
- 
+        if not (self._graph[edge[1]]):
+            del self._graph[edge[1]]  
+
     def __str__(self):
         return '{}({})'.format(self.__class__.__name__, dict(self._graph))
-        #return '{}({})'.format('merda', 'merda')
-        #return 'merda'
 
     def p(self):
+        """ debug """
         pprint(dict(self._graph))
 # ---------------------------------------------------------------------------------------------
 
@@ -73,13 +52,11 @@ def make_edges(tags):
 
 def main():
 
-    #connections = [('A', 'B'), ('B', 'C'), ('B', 'D'),('C', 'D'), ('E', 'F'), ('F', 'C')]
-    #g = Graph(connections)
-    #g.p()
-    
+    ft2 = open('../tweet_output/ft2.txt', 'w')
+
     # Initialize our graph
     g = Graph()
-    
+   
     with open('../tweet_output/ft1.txt') as File:
         for tweet in File:
           tags = getTags(tweet)
@@ -87,63 +64,62 @@ def main():
               first_tweet = tweet
               break
     
-    tweets = [ first_tweet  ] # list of tweets with two or more hashtags in the past 60s
-    
-    old_time = getTime(tweets[0]) # Oldest tweet time
-    old_tags = getTags(tweets[0])
-    old_edges = make_edges(old_tags)
+    tweets = [   ] # list of relevant tweets (two or more hashtags) in the past 60s
    
-    ft2 = open('../tweet_output/ft2.txt', 'w')
- 
+    # For efficiency, it keeps track of the oldest tweet 
+    old_time = getTime(first_tweet) 
+    old_tags = getTags(first_tweet)
+    old_edges = make_edges(old_tags)
+     
     counter = 1
     # For each tweet that arrives ...
     with open('../tweet_output/ft1.txt') as File:
         for tweet in File:
             # Obs: It automatically uses buffered IO and memory management so you don't have to worry about large files.
             # Please check http://stackoverflow.com/questions/8009882/how-to-read-large-file-line-by-line-in-python
-            print("")
-            print("counter = ", counter)
+            #print("")
+            #print("counter = ", counter)
             counter = counter + 1
-           
+          
+            # End of tweets 
             if tweet == '\n':
               break
 
-            
- 
             # extraxt timestamp
             time = getTime(tweet) 
             tags = getTags(tweet)
             edges = make_edges(tags)   
   
             # If there is no edge, continue 
-            if len(tags) < 2:
-                continue
+            if len(tags) > 1:
  
-            tweets.append(tweet)
+                tweets.append(tweet)
+    
+                # Check 60s window
+                if time-old_time > 60:
+                    
+                    for i,j in old_edges:
+                        g.remove_edge((i,j))
+                    tweets.pop(0)
+                    old_time = getTime(tweets[0]) 
+                    old_tags = getTags(tweets[0])
+                    old_edges = make_edges(old_tags)
 
-            # Check 60s window
-            if time-old_time > 60:
-                for i,j in old_edges:
-                    g.remove_edge((i,j))
-                tweets.pop(0)
-                old_time = getTime(tweets[0]) 
-                old_tags = getTags(tweets[0])
-                old_edges = make_edges(old_tags)
+                # Include the new edges in the graph.
+                # It comes after the removal because of the cases of repeated tweets
+                for i,j in edges:
+                    g.add_edge((i,j))
 
-            # Include the new edges in the graph
-            for i,j in edges:
-                g.add_edge((i,j))
-        
-            #print(edges)
-            print("Graph:")
+            print("Graph tweet #", counter-1)
             g.p()
 
             # compute the average degree
             ave = 0
-            for key, value in g._graph.iteritems():
-                ave = ave + len(value)
-            #ave = ave / len(g._graph)
-            print(" ===============================  Average: ", ave, len(g._graph))
+            if len(g._graph) > 0:
+                for key, value in g._graph.iteritems():
+                    ave = ave + len(value)
+                ave = ave / float(len(g._graph))
+            ft2.write("%.2f\n" % ave)
 
     ft2.close()
 
