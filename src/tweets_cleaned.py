@@ -13,6 +13,9 @@ def isUnicode(s):
 def main():
 
     if ( len(sys.argv) < 3 ):
+        print("")
+        print("Using default directories")
+        print("")
         InputFile = '../tweet_input/tweets.txt'
         OutputFile = '../tweet_output/ft1.txt'
     else:

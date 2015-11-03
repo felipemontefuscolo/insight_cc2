@@ -55,6 +55,9 @@ def make_edges(tags):
 def main():
 
     if ( len(sys.argv) < 3 ):
+        print("")
+        print("Using default directories")
+        print("")
         InputFile = '../tweet_output/ft1.txt'
         OutputFile = '../tweet_output/ft2.txt'
     else:
@@ -82,7 +85,7 @@ def main():
      
     counter = 1
     # For each tweet that arrives ...
-    with open('../tweet_output/ft1.txt') as File:
+    with open(InputFile) as File:
         for tweet in File:
             # Obs: It automatically uses buffered IO and memory management so you don't have to worry about large files.
             # Please check http://stackoverflow.com/questions/8009882/how-to-read-large-file-line-by-line-in-python
