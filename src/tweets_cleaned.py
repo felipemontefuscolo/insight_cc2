@@ -28,3 +28,7 @@ for tt in tweets:
 ft1.write('\n' + str(num_unicodes) + ' tweets contained unicode.\n')
 
 ft1.close()
+
+print("")
+print("Done. Please check the output ../tweet_output/ft1.txt")
+print("")
