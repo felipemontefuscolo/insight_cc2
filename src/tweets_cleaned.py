@@ -1,4 +1,6 @@
 import json  # to read json data
+import sys # to read arguments
+
 
 def isUnicode(s):
     try:
@@ -8,27 +10,41 @@ def isUnicode(s):
     else:
         return False
 
-# Create a vector of tweets, i.e., each element is a tweet 
-tweets = []
-with open('../tweet_input/tweets.txt') as txt:
-    tweets = txt.read().splitlines()
+def main():
 
-# Output file
-ft1 = open('../tweet_output/ft1.txt', 'w')
+    if ( len(sys.argv) < 3 ):
+        InputFile = '../tweet_input/tweets.txt'
+        OutputFile = '../tweet_output/ft1.txt'
+    else:
+        InputFile = str(sys.argv[1])
+        OutputFile = str(sys.argv[2])
 
-num_unicodes = 0
-for tt in tweets:
-    data = json.loads(tt)
-    txt = data['text']
-    if isUnicode(txt):
-        num_unicodes = num_unicodes+1
-        txt = txt.encode('ascii', 'ignore')
-    ft1.write(txt + " (timestamp: " + data['created_at'] + ")\n")
+    # Create a vector of tweets, i.e., each element is a tweet 
+    tweets = []
+    with open(InputFile) as txt:
+        tweets = txt.read().splitlines()
+    
+    # Output file
+    ft1 = open(OutputFile, 'w')
+    
+    num_unicodes = 0
+    for tt in tweets:
+        data = json.loads(tt)
+        txt = data['text']
+        if isUnicode(txt):
+            num_unicodes = num_unicodes+1
+            txt = txt.encode('ascii', 'ignore')
+        ft1.write(txt + " (timestamp: " + data['created_at'] + ")\n")
+    
+    ft1.write('\n' + str(num_unicodes) + ' tweets contained unicode.\n')
+    
+    ft1.close()
+    
+    print("")
+    print("Done. Please check the output " + OutputFile)
+    print("")
 
-ft1.write('\n' + str(num_unicodes) + ' tweets contained unicode.\n')
+    return 0
 
-ft1.close()
-
-print("")
-print("Done. Please check the output ../tweet_output/ft1.txt")
-print("")
+if __name__ == "__main__":
+    main()

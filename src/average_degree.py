@@ -3,7 +3,7 @@ from collections import defaultdict
 import time      # to read timestamp
 import re        # regex
 from pprint import pprint  # debug purpose
-
+import sys # to read arguments
 
 class Graph(object):
     """ Graph data structure, undirected by default. """
@@ -54,12 +54,19 @@ def make_edges(tags):
 
 def main():
 
-    ft2 = open('../tweet_output/ft2.txt', 'w')
+    if ( len(sys.argv) < 3 ):
+        InputFile = '../tweet_output/ft1.txt'
+        OutputFile = '../tweet_output/ft2.txt'
+    else:
+        InputFile = str(sys.argv[1])
+        OutputFile = str(sys.argv[2])
+
+    ft2 = open(OutputFile, 'w')
 
     # Initialize our graph
     g = Graph()
    
-    with open('../tweet_output/ft1.txt') as File:
+    with open(InputFile) as File:
         for tweet in File:
           tags = getTags(tweet)
           if len(tags) > 1:
@@ -126,8 +133,10 @@ def main():
     ft2.close()
 
     print("") 
-    print("Done. Please Check the output ../tweet_output/ft2.txt")
+    print("Done. Please Check the output " + OutputFile)
     print("")
+
+    return 0
 
 if __name__ == "__main__":
     main()
