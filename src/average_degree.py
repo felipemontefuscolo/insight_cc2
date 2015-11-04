@@ -104,21 +104,20 @@ def main():
             tags = getTags(tweet)
             edges = make_edges(tags)   
   
+            tweets.append(tweet)
+    
+            # Check 60s window
+            while (time-old_time > 60):
+                
+                for i,j in old_edges:
+                    g.remove_edge((i,j))
+                tweets.pop(0)
+                old_time = getTime(tweets[0]) 
+                old_tags = getTags(tweets[0])
+                old_edges = make_edges(old_tags)
+            
             # If there is no edge, continue 
             if len(tags) > 1:
- 
-                tweets.append(tweet)
-    
-                # Check 60s window
-                while (time-old_time > 60):
-                    
-                    for i,j in old_edges:
-                        g.remove_edge((i,j))
-                    tweets.pop(0)
-                    old_time = getTime(tweets[0]) 
-                    old_tags = getTags(tweets[0])
-                    old_edges = make_edges(old_tags)
-
                 # Include the new edges in the graph.
                 # It comes after the removal because of the cases of repeated tweets
                 for i,j in edges:
