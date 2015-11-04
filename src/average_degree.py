@@ -1,7 +1,7 @@
 import json      # to read json data
-from collections import defaultdict
+from collections import defaultdict # our container
 import time      # to read timestamp
-import re        # regex
+import re        # regex to read timestamp
 from pprint import pprint  # debug purpose
 import sys # to read arguments
 
@@ -19,11 +19,13 @@ class Graph(object):
     def remove_edge(self, edge):
         """ remove and edge (tuple) from the graph """
         if edge[0] in self._graph:
-            self._graph[edge[0]].remove(edge[1])
+            if edge[1] in self._graph[edge[0]]:
+                self._graph[edge[0]].remove(edge[1])
             if not (self._graph[edge[0]]):
                 del self._graph[edge[0]]
         if edge[1] in self._graph:
-            self._graph[edge[1]].remove(edge[0])
+            if edge[0] in self._graph[edge[1]]:
+                self._graph[edge[1]].remove(edge[0])
             if not (self._graph[edge[1]]):
                 del self._graph[edge[1]]  
 

@@ -1,6 +1,6 @@
 import json  # to read json data
 import sys # to read arguments
-
+import string # to remove escape characters 
 
 def isUnicode(s):
     try:
@@ -11,6 +11,11 @@ def isUnicode(s):
         return False
 
 def main():
+
+    # Used to remove escape characters. Source: http://stackoverflow.com/questions/8115261/how-to-remove-all-the-escape-sequences-from-a-list-of-strings
+    escapes = ''.join([chr(char) for char in range(1, 32)])
+    estable = 31 * ' '
+
 
     if ( len(sys.argv) < 3 ):
         print("")
@@ -29,15 +34,22 @@ def main():
     
     # Output file
     ft1 = open(OutputFile, 'w')
-    
+   
+    num_invalid_tweets = 0
     num_unicodes = 0
     for tt in tweets:
         data = json.loads(tt)
-        txt = data['text']
-        if isUnicode(txt):
-            num_unicodes = num_unicodes+1
-            txt = txt.encode('ascii', 'ignore')
-        ft1.write(txt + " (timestamp: " + data['created_at'] + ")\n")
+        try: #ignore invalid tweets
+            txt = data['text']
+        except:
+            num_invalid_tweets += 1
+            continue
+        else:
+            if isUnicode(txt):
+                 num_unicodes = num_unicodes+1
+                 txt = txt.encode('ascii', 'ignore')
+            txt = str(txt).translate(string.maketrans(escapes, estable))
+            ft1.write(txt + " (timestamp: " + data['created_at'] + ")\n")
     
     ft1.write('\n' + str(num_unicodes) + ' tweets contained unicode.\n')
     
@@ -45,6 +57,7 @@ def main():
     
     print("")
     print("Done. Please check the output " + OutputFile)
+    #print("# of invalid tweets: " + str(num_invalid_tweets))
     print("")
 
     return 0
