@@ -1,6 +1,7 @@
 import json  # to read json data
 import sys # to read arguments
 import string # to remove escape characters 
+from HTMLParser import HTMLParser
 
 def isUnicode(s):
     try:
@@ -15,7 +16,8 @@ def main():
     # Used to remove escape characters. Source: http://stackoverflow.com/questions/8115261/how-to-remove-all-the-escape-sequences-from-a-list-of-strings
     escapes = ''.join([chr(char) for char in range(1, 32)])
     estable = 31 * ' '
-
+ 
+    parser = HTMLParser()
 
     if ( len(sys.argv) < 3 ):
         print("")
@@ -48,6 +50,7 @@ def main():
             if isUnicode(txt):
                  num_unicodes = num_unicodes+1
                  txt = txt.encode('ascii', 'ignore')
+            txt = parser.unescape(txt) # replace &gt;, etc.
             txt = str(txt).translate(string.maketrans(escapes, estable)).lower()
             ft1.write(txt + " (timestamp: " + data['created_at'] + ")\n")
     

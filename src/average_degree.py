@@ -96,8 +96,8 @@ def main():
             # Obs: It automatically uses buffered IO and memory management so you don't have to worry about large files.
             # Please check http://stackoverflow.com/questions/8009882/how-to-read-large-file-line-by-line-in-python
             #print("")
-            print("counter = ", counter)
-            counter = counter + 1
+            #print("counter = ", counter)
+            #counter = counter + 1
           
             # End of tweets 
             if tweet.isspace():
@@ -134,7 +134,7 @@ def main():
             ft2.write("%.2f\n" % g.average_degree())
 
     ft2.close()
-    g.p()
+    #g.p()
     print("") 
     print("Done. Please Check the output " + OutputFile)
     print("")
