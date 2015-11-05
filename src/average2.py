@@ -9,48 +9,32 @@ class Graph(object):
     """ Graph data structure, undirected by default. """
 
     def __init__(self):
-        self._edges = defaultdict(lambda: 0)  # (tagA, tagB) -> weight
-        self._nodes = defaultdict(lambda: 0)  # tag -> counter
+        self._graph = defaultdict(set)
 
     def add_edge(self, edge):
         """ Add an edge (tuple) to the graph """
-        edge = tuple(sorted(edge))
-
-        self._edges[edge] += 1
-        self._nodes[edge[0]] += 1
-        self._nodes[edge[1]] += 1
-
+        self._graph[edge[0]].add(edge[1])
+        self._graph[edge[1]].add(edge[0])
+    
     def remove_edge(self, edge):
-        """ remove and edge (tuple) from the graph. Does not check for errors (invalid key). """
-        edge = tuple(sorted(edge))
-
-        if self._edges[edge] == 1:
-            del self._edges[edge]
-        else:
-            self._edges[edge] -= 1
-
-        if self._nodes[edge[0]] == 1:
-            del self._nodes[edge[0]]
-        else:
-            self._nodes[edge[0]] -= 1
-
-        if self._nodes[edge[1]] == 1:
-            del self._nodes[edge[1]]
-        else:
-            self._nodes[edge[1]] -= 1
-
-    def average_degree(self):
-        if self._nodes:
-            return float(2*len(self._edges)) / float(len(self._nodes))
-        else:
-            return 0
+        """ remove and edge (tuple) from the graph """
+        if edge[0] in self._graph:
+            if edge[1] in self._graph[edge[0]]:
+                self._graph[edge[0]].remove(edge[1])
+            if not (self._graph[edge[0]]):
+                del self._graph[edge[0]]
+        if edge[1] in self._graph:
+            if edge[0] in self._graph[edge[1]]:
+                self._graph[edge[1]].remove(edge[0])
+            if not (self._graph[edge[1]]):
+                del self._graph[edge[1]]  
 
     def __str__(self):
-        return '{}({})'.format(self.__class__.__name__, dict(self._edges))
+        return '{}({})'.format(self.__class__.__name__, dict(self._graph))
 
     def p(self):
         """ debug """
-        pprint(dict(self._edges))
+        pprint(dict(self._graph))
 # ---------------------------------------------------------------------------------------------
 
 def getTags(tweet):
@@ -87,7 +71,14 @@ def main():
     # Initialize our graph
     g = Graph()
    
-    tweets = [   ] # list of tuples (tags, timestamp) in the past 60s
+    with open(InputFile) as File:
+        for tweet in File:
+          tags = getTags(tweet)
+          if len(tags) > 1:
+              first_tweet = tweet
+              break
+    
+    tweets = [   ] # list of tweet's tags and time (with two or more tags) in the past 60s
 
     counter = 1
     # For each tweet that arrives ...
@@ -96,14 +87,12 @@ def main():
             # Obs: It automatically uses buffered IO and memory management so you don't have to worry about large files.
             # Please check http://stackoverflow.com/questions/8009882/how-to-read-large-file-line-by-line-in-python
             #print("")
-            print("counter = ", counter)
-            counter = counter + 1
+            #print("counter = ", counter)
+            #counter = counter + 1
           
             # End of tweets 
-            if tweet.isspace():
+            if tweet == '\n':
               break
-
-            tweet = tweet.lower()
 
             # extraxt timestamp
             time = getTime(tweet) 
@@ -113,10 +102,9 @@ def main():
  
             # Check 60s window
             while (time - tweets[0][1] > 60):
-                if len(tweets[0][0]) > 1:
-                    old_edges = make_edges(tweets[0][0])
-                    for i,j in old_edges:
-                        g.remove_edge((i,j))
+                old_edges = make_edges(tweets[0][0])
+                for i,j in old_edges:
+                    g.remove_edge((i,j))
                 tweets.pop(0)
             
             # If there is no edge, continue 
@@ -131,10 +119,16 @@ def main():
             #print("Graph tweet #", counter-1)
             #g.p()
 
-            ft2.write("%.2f\n" % g.average_degree())
+            # compute the average degree
+            ave = 0
+            if len(g._graph) > 0:
+                for key, value in g._graph.iteritems():
+                    ave += len(value)
+                ave = ave / float(len(g._graph))
+            ft2.write("%.2f\n" % ave)
 
     ft2.close()
-    g.p()
+
     print("") 
     print("Done. Please Check the output " + OutputFile)
     print("")

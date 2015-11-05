@@ -48,7 +48,7 @@ def main():
             if isUnicode(txt):
                  num_unicodes = num_unicodes+1
                  txt = txt.encode('ascii', 'ignore')
-            txt = str(txt).translate(string.maketrans(escapes, estable))
+            txt = str(txt).translate(string.maketrans(escapes, estable)).lower()
             ft1.write(txt + " (timestamp: " + data['created_at'] + ")\n")
     
     ft1.write('\n' + str(num_unicodes) + ' tweets contained unicode.\n')
