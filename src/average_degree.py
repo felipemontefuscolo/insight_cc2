@@ -9,7 +9,7 @@ class Graph(object):
     """ Graph data structure, undirected by default. """
 
     def __init__(self):
-        self._edges = defaultdict(lambda: 0)  # (tagA, tagB) -> weight
+        self._edges = defaultdict(lambda: 0)  # (tagA, tagB) -> counter
         self._nodes = defaultdict(lambda: 0)  # tag -> counter
 
     def add_edge(self, edge):

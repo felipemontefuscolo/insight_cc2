@@ -1,7 +1,7 @@
 import json  # to read json data
 import sys # to read arguments
 import string # to remove escape characters 
-from HTMLParser import HTMLParser
+from HTMLParser import HTMLParser # replace &gt;, etc.
 
 def isUnicode(s):
     try:
